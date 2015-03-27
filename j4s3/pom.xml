@@ -1,0 +1,156 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>eu.giuseppeurso.aws</groupId>
+	<artifactId>s3</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>AWS S3 utilities</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+	<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk</artifactId>
+			<version>1.9.6</version>
+		</dependency>
+		<!-- See my projects on github giuseppeurso-eu -->
+		<dependency>
+			<groupId>eu.giuseppeurso.security</groupId>
+			<artifactId>jca</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<resources>
+			<resource>
+				<directory>${env.HOME}/.aws/</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<!-- <plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>com.amazonaws.samples.S3Sample</mainClass>
+				</configuration>
+			</plugin>-->
+			
+			<!-- <plugin> 
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>copy-dependencies</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>copy-dependencies</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>                       
+                        <overWriteReleases>false</overWriteReleases>
+                        <overWriteSnapshots>false</overWriteSnapshots>
+                        <overWriteIfNewer>true</overWriteIfNewer>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+			-->
+			
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<finalName>j4s3</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+					<!-- <descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+						
+					</descriptorRefs>-->
+				 <descriptors>
+            <descriptor>src/main/assembly/descriptor.xml</descriptor>
+          </descriptors>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+                        	<classpathPrefix>lib/</classpathPrefix>
+						 	<mainClass>eu.giuseppeurso.aws.s3.UI</mainClass>
+						</manifest>
+						<manifestEntries>
+                        <Class-Path>.lib/</Class-Path>
+                    </manifestEntries>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>install</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				
+					
+				<configuration>
+				<finalName>j4s3</finalName>
+				  <includes>
+              <include>**/*</include>
+            </includes>
+				  <archive>
+					<manifest>
+						<addClasspath>true</addClasspath>
+                        <classpathPrefix>lib/</classpathPrefix>
+						<mainClass>eu.giuseppeurso.aws.s3.UI</mainClass>
+					</manifest>
+				  </archive>
+				</configuration>
+				
+			</plugin>
+ -->
+			
+		</plugins>
+	</build>
+
+
+</project>
