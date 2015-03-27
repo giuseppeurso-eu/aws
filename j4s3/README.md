@@ -1,4 +1,4 @@
-# Java Client for Amazon S3
+# J4S3 - Java Client for Amazon S3
 
 A simple Java application illustrating usage of the AWS SDK for Java.
 
