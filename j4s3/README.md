@@ -7,7 +7,7 @@ A simple Java application illustrating usage of the AWS SDK for Java.
 The only requirement of this application is Maven. All other dependencies can
 be installed by building the maven package:
     
-    mvn package
+    mvn install
 
 ## Basic Configuration
 
