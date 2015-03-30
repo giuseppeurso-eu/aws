@@ -108,42 +108,64 @@ public class UtilitiesTest {
 	}
 	
 	/**
-	 * A test case for isValid
+	 * A test case for isValidID
 	 */
 	@Test
-	public void testIsValid(){
+	public void testIsValidID(){
 		boolean actual = false;
 
 		String input = null;
-		if (!Utilities.isValid(input)) {
+		if (!Utilities.isValidID(input)) {
 			actual=true;
 		}
 		Assert.assertEquals("Failed to check ID (case null).", true, actual);
 		actual = false;
 
 		input="123";
-		if (!Utilities.isValid(input)) {
+		if (!Utilities.isValidID(input)) {
 			actual=true;
 		}
 		Assert.assertEquals("Failed to check ID (case number chars).", true, actual);
 		actual = false;
 		
 		input="";
-		if (!Utilities.isValid(input)) {
+		if (!Utilities.isValidID(input)) {
 			actual=true;
 		}
 		Assert.assertEquals("Failed to check ID (case blank string).", true, actual);
 		actual = false;
 		
 		input = "xxxxxxxxxxxxxxxxxxxx";
-		if (Utilities.isValid(input)) {
+		if (Utilities.isValidID(input)) {
 			actual=true;
 		}
 		Assert.assertEquals("Failed to check ID (case ID ok).", true, actual);
 		actual = false;
 		
 		input = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-		if (Utilities.isValid(input)) {
+		if (!Utilities.isValidID(input)) {
+			actual=true;
+		}
+		Assert.assertEquals("Failed to check ID (case Key not ID).", true, actual);
+	}
+	
+	/**
+	 * A test case for isValidKey
+	 */
+	@Test
+	public void testIsValidKey(){
+		boolean actual = false;
+
+		String input = null;
+		input = "xxxxxxxxxxxxxxxxxxxx";
+		if (!Utilities.isValidKey(input)) {
+			actual=true;
+		}
+		Assert.assertEquals("Failed to check ID (case ID not Key).", true, actual);
+		actual = false;
+		
+		input = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+		if (Utilities.isValidKey(input)) {
 			actual=true;
 		}
 		Assert.assertEquals("Failed to check ID (case Key ok).", true, actual);

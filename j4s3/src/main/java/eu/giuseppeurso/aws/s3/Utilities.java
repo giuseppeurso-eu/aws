@@ -73,13 +73,26 @@ public class Utilities {
 	}
 	
 	/**
-	 * A simple validation to check the number of chars for the AWS ID or Key string
+	 * A simple validation to check the number of chars for the AWS ID string
 	 * @param input
 	 * @return
 	 */
-	public static boolean isValid(String input){
+	public static boolean isValidID(String input){
 		boolean actual=false;
-		if (input!=null && input!=""&& (input.length()==20 || input.length()==40) ) {
+		if (input!=null && input!=""&& input.length()==20) {
+			actual=true;
+		}
+		return actual;
+	}
+	
+	/**
+	 * A simple validation to check the number of chars for the AWS Key string
+	 * @param input
+	 * @return
+	 */
+	public static boolean isValidKey(String input){
+		boolean actual=false;
+		if (input!=null && input!=""&& input.length()==40) {
 			actual=true;
 		}
 		return actual;
