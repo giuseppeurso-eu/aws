@@ -103,7 +103,17 @@ public class UI {
 	
 	
 
-
+	/**
+	 * This method launches the wizard for the AWS credentials encryption. A file with the encrypted credentials is generated. 
+	 * @throws IOException
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidAlgorithmParameterException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 */
 	public static void generateEncryptedFile() throws IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException{
 		System.out.println("");
 		System.out.println("In order to store your credentials into a file with password-based encryption, please provide the following properties.");
@@ -111,19 +121,19 @@ public class UI {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		Map<String,String> inputMap = new LinkedHashMap<String, String>();
 		
-		System.out.println("File name: ");
+		System.out.println("Enter a name for the file where your credentials will be stored (ex. my-aws.encrypted): ");
 		inputMap.put("file", in.readLine());
 		
-		System.out.println("AWS ID: ");
+		System.out.println("Your AWS ID: ");
 		String awsid="";
-		for (awsid = in.readLine(); !Utilities.isValid(awsid); awsid = in.readLine()) {
+		for (awsid = in.readLine(); !Utilities.isValidID(awsid); awsid = in.readLine()) {
 			System.out.println("Attention, please provide a valid string for AWS ID (20 alphanumeric chars): ");
 		}
 		inputMap.put("awsid", awsid);
 				
-		System.out.println("AWS Key: ");
+		System.out.println("Your AWS Key: ");
 		String keyid="";
-		for (keyid = in.readLine(); !Utilities.isValid(keyid); keyid = in.readLine()) {
+		for (keyid = in.readLine(); !Utilities.isValidKey(keyid); keyid = in.readLine()) {
 			System.out.println("Attention, please provide a valid string for AWS KEY (40 alphanumeric chars): ");
 		}
 		inputMap.put("awskey", keyid);
@@ -135,24 +145,12 @@ public class UI {
 			passwordValues = passwordForm(in);
 		}
 		inputMap.put("password", passwordValues[0]);
-	    
 		
 		for (Entry<String, String> entry : inputMap.entrySet()) {
 			System.out.println("K: "+entry.getKey());
 			System.out.println("V: "+entry.getValue());
 		}
-		
-//		int inputNumbers = 4;
-//		String[] inputs = new String[inputNumbers];
-//		for (int i = 0; i < inputNumbers; i++){
-//		    inputs[i] = in.readLine();
-//		    form.put("file", in.readLine());
-//			System.out.println(inputs[i]);
-//		}
-//		 while ((s = in.readLine()) != null && s.length() != 0)
-//		      System.out.println(s);
-		
-		
+	
 		byte[] awsAccessId = inputMap.get("awsid").getBytes("UTF8");
 		byte[] awsAccessKey = inputMap.get("awskey").getBytes("UTF8");
 		
