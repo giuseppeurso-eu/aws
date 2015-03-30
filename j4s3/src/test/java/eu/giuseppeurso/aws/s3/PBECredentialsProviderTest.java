@@ -99,7 +99,7 @@ public class PBECredentialsProviderTest {
 
 		boolean actual = false;
 		
-		byte[] decryptedText = pbecProvider.decryptCredentials();	
+		byte[] decryptedText = PBECredentialsProvider.decryptCredentials();	
 		//String decryptedTextValue = new String(decryptedText, "UTF-8");
 		//System.out.println("Decrypted text is: "+decryptedTextValue);
 		
@@ -114,19 +114,19 @@ public class PBECredentialsProviderTest {
 	}
 	
 	/**
-	 * Test case for retrieveKeyValue
+	 * Test case for retrieveAWSKey
 	 * @throws Exception
 	 */
 	@org.junit.Test
-	public void testRetrieveKeyValue() throws Exception {
+	public void testRetrieveAWSKey() throws Exception {
 		boolean actual = false;
 		
 		String keyToRetrieve = "aws.access.id";
-		String id = pbecProvider.retrieveKeyValue(keyToRetrieve);
-		//System.out.println("value of: "+keyToRetrieve+" is: "+id);
+		String id = PBECredentialsProvider.retrieveAWSKey(keyToRetrieve);
+//		System.out.println("value of: "+keyToRetrieve+" is: "+id);
 		keyToRetrieve = "aws.access.key";
-		String key = pbecProvider.retrieveKeyValue(keyToRetrieve);
-		//System.out.println("value of: "+keyToRetrieve+" is: "+key);
+		String key = PBECredentialsProvider.retrieveAWSKey(keyToRetrieve);
+//		System.out.println("value of: "+keyToRetrieve+" is: "+key);
 		if (id!=null && id.equals(sourceID) && (key!=null && key.equals(sourceKey)) ) {
     		actual = true;
 		}
@@ -143,7 +143,10 @@ public class PBECredentialsProviderTest {
 		boolean actual = false;
 		AWSCredentials awsc = pbecProvider.getCredentials();
 		String id = awsc.getAWSAccessKeyId();
-		String key = awsc.getAWSSecretKey(); 
+		String key = awsc.getAWSSecretKey();
+		System.out.println("key: "+key);
+		//Remove the attached char \n at the end of string
+		//key= key.substring(0,key.length()-1);
 		if (id!=null && id.equals(sourceID) && (key!=null && key.equals(sourceKey)) ) {
     		actual = true;
 		}

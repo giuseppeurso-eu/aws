@@ -21,8 +21,8 @@ public class PBECredentialsProvider implements AWSCredentialsProvider {
 	private static final String awsAccessIdProperty="aws.access.id";
 	private static final String awsAccessKeyProperty="aws.access.key";
 	
-	private byte[] cipher;
-	private String password;
+	private static byte[] cipher;
+	private static String password;
 	
 	/**
 	 * @return the cipher
@@ -62,8 +62,8 @@ public class PBECredentialsProvider implements AWSCredentialsProvider {
 		String awsAccessId="";
 		String awsAccessKey="";
 		try {
-			awsAccessId = retrieveKeyValue(awsAccessIdProperty);
-			awsAccessKey = retrieveKeyValue(awsAccessKeyProperty);
+			awsAccessId = retrieveAWSKey(awsAccessIdProperty);
+			awsAccessKey = retrieveAWSKey(awsAccessKeyProperty);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -84,20 +84,22 @@ public class PBECredentialsProvider implements AWSCredentialsProvider {
 	 * @return
 	 * @throws Exception
 	 */
-	protected byte[] decryptCredentials() throws Exception {
+	protected static byte[] decryptCredentials() throws Exception {
 		byte[] credentials=null;
 		credentials = PasswordBasedEncryption.decrypt(cipher, password);
 		return credentials;
 	}
 	
 	/**
-	 * A method to retrieve the AWS key values.
+	 * A method to retrieve an AWS key value from a plain-text of two lines
 	 * @param key property to retrieve
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 * @throws Exception
+	 * @deprecated Use retrieveAWSKey(String key)
 	 */
-	protected String retrieveKeyValue(String key) throws UnsupportedEncodingException, Exception{
+	@Deprecated 
+	protected static String retrieveKeyValueFromTwoLines(String key) throws UnsupportedEncodingException, Exception{
 		String keyValue="";
 		String plainTextValue = new String(decryptCredentials(), "UTF-8");
 		String[] lines = plainTextValue.split(System.getProperty("line.separator"));
@@ -105,6 +107,26 @@ public class PBECredentialsProvider implements AWSCredentialsProvider {
 			if (lines[i]!=null && lines[i].contains(key)){
 			keyValue= lines[i].replaceAll(key+"=", "");
 			}
+		}
+	 return keyValue;	
+	}
+	
+	/**
+	 * A method to retrieve a key from a plain-text
+	 * @param key
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws Exception
+	 */
+	protected static String retrieveAWSKey(String key) throws UnsupportedEncodingException, Exception{
+		String keyValue="";
+		String plainTextValue = new String(decryptCredentials(), "UTF-8");
+		plainTextValue = plainTextValue.replaceAll("\n", "");
+		if (key!=null && key.equals(awsAccessIdProperty)) {
+			keyValue=plainTextValue.substring(awsAccessIdProperty.length()+1, awsAccessIdProperty.length()+21);
+		}
+		if (key!=null && key.equals(awsAccessKeyProperty)) {
+			keyValue=plainTextValue.substring(plainTextValue.length()-40,plainTextValue.length());
 		}
 	 return keyValue;	
 	}
