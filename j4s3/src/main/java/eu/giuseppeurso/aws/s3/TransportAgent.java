@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
@@ -36,61 +37,81 @@ import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.transfer.MultipleFileUpload;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.Upload;
 
 /**
  * This sample demonstrates how to make basic requests to Amazon S3 using
- * the AWS SDK for Java.
+ * the AWS SDK for Java <a href="http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html">AWS SDK Java API Reference</a>
  * <p>
- * <b>Prerequisites:</b> You must have a valid Amazon Web Services developer
+ * <b>Prerequisites:</b> You must have a valid Amazon Web Services 
  * account, and be signed up to use Amazon S3. For more information on
  * Amazon S3, see http://aws.amazon.com/s3.
  * <p>
- * <b>Important:</b> Be sure to fill in your AWS access credentials in
- * ~/.aws/credentials (C:\Users\USER_NAME\.aws\credentials for Windows
- * users) before you try to run this sample.
+ * 
+ * @author Giuseppe Urso - <a href="http://www.giuseppeurso.eu">www.giuseppeurso.eu</a>
  */
-public class TransferManager {
+public class TransportAgent {
 
 	private static AmazonS3 s3Client;
+	private static TransferManager tx;
 	
 
 	/**
 	 * A quick way for accessing the Amazon S3 web service using the PBECredentialsProvider in the constructor.
 	 * @param pbecProvider
 	 */
-	public TransferManager(PBECredentialsProvider pbecProvider) {
+	public TransportAgent(PBECredentialsProvider pbecProvider) {
 		s3Client = new AmazonS3Client(pbecProvider.getCredentials());
+		tx = new TransferManager(s3Client);
 	}
+	
+	
+	
 	
 	/**
-	 * @return the s3Client
+	 * A simple method to put a new object to a S3 bucket. To prevent name collisions, a random UUID is used.
+	 * @param region
+	 * @param bucketName
+	 * @param file
 	 */
-	private static AmazonS3 getS3Client() {
-		return s3Client;
-	}
-
-	/**
-	 * @param s3Client the s3Client to set
-	 */
-	private static void setS3Client(AmazonS3 s3Client) {
-		TransferManager.s3Client = s3Client;
-	}
-
-	
-	
-	public static void uploadNewFile(Region region, String bucketName, File file){
-		
+	public void uploadNewFileWithRandomKey(Region region, String bucketName, File file) {
 		s3Client.setRegion(region);
-        String key = "MyObjectKey"+UUID.randomUUID();
+		String key = "ID_" + UUID.randomUUID();
+		System.out.println("Uploading a new object to S3 from a file...");
+		try {
+			s3Client.putObject(new PutObjectRequest(bucketName, key, file));
+		} catch (AmazonServiceException e) {
+			System.out.println("Service error while uploading a new object to S3.");
+			System.out.println(e);
+			e.printStackTrace();
+		} catch (AmazonClientException e) {
+			System.out.println("Client error while uploading a new object to S3.");
+			System.out.println(e);
+		}
+		System.out.println("Creation of the new object completed!");
+	}
 
-        System.out.println("===========================================");
-        System.out.println("Getting Started with Amazon S3");
-        System.out.println("===========================================\n");
-        
-		 System.out.println("Uploading a new object to S3 from a file\n");
-		 s3Client.putObject(new PutObjectRequest(bucketName, key, file));
-   }
-
+	/**
+	 * A method to upload a directory recursively to a S3 bucket. The provided directory name is used as root element.
+	 * @param region
+	 * @param bucketName
+	 * @param directory
+	 */
+	public void uploadDirRecursively(Region region, String bucketName, File directory){
+		s3Client.setRegion(region);
+		try {
+			System.out.println("Uploading directory recursively to S3...");
+			MultipleFileUpload mfu = tx.uploadDirectory(bucketName, directory.getName(), directory, true);
+			mfu.waitForCompletion();
+			} catch (Exception e) {
+			System.out.println("Error while uploading directories recursively to S3.");
+			System.out.println(e);			
+		}		
+		System.out.println("Directory upload completed!");
+	}
+	
 	
     
 //	public static void main(String[] args) throws IOException {
@@ -231,48 +252,7 @@ public class TransferManager {
 
 
 
-	/**
-     * Creates a temporary file with text data to demonstrate uploading a file
-     * to Amazon S3
-     *
-     * @return A newly created temporary file with text data.
-     *
-     * @throws IOException
-     */
-    private static File createSampleFile() throws IOException {
-        File file = File.createTempFile("aws-java-sdk-", ".txt");
-        file.deleteOnExit();
-
-        Writer writer = new OutputStreamWriter(new FileOutputStream(file));
-        writer.write("abcdefghijklmnopqrstuvwxyz\n");
-        writer.write("01234567890112345678901234\n");
-        writer.write("!@#$%^&*()-=[]{};':',.<>/?\n");
-        writer.write("01234567890112345678901234\n");
-        writer.write("abcdefghijklmnopqrstuvwxyz\n");
-        writer.close();
-
-        return file;
-    }
-
-    /**
-     * Displays the contents of the specified input stream as text.
-     *
-     * @param input
-     *            The input stream to display as text.
-     *
-     * @throws IOException
-     */
-    private static void displayTextInputStream(InputStream input) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) break;
-
-            System.out.println("    " + line);
-        }
-        System.out.println();
-    }
-    
+	    
     
     
 
