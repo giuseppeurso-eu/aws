@@ -1,7 +1,11 @@
 package eu.giuseppeurso.aws.s3;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+
+import org.apache.commons.io.FileUtils;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -36,6 +40,17 @@ public class PBECredentialsProvider implements AWSCredentialsProvider {
 	 */
 	public void setCipher(byte[] cipher) {
 		this.cipher = cipher;
+	}
+	
+	/**
+	 * Set cipher byte[] starting from the name of the encrypted file.
+	 * @param cipherFile
+	 * @throws IOException
+	 */
+	public void setCipherFromFileName(String cipherFile) throws IOException {
+		File file = new File(cipherFile);
+		byte[] cipherText = FileUtils.readFileToByteArray(file);	
+		this.cipher = cipherText;
 	}
 
 	/**
