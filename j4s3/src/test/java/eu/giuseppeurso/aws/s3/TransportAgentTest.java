@@ -6,6 +6,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.text.DecimalFormat;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -104,7 +105,7 @@ public class TransportAgentTest {
 			e.printStackTrace();
 		}
 		actual=true;
-		Assert.assertEquals("Error on TEST CASE: "+this.getClass(), true, actual);
-		
+		Assert.assertEquals("Error on TEST CASE: "+this.getClass(), true, actual);		
 	}
+	
 }

@@ -1,45 +1,17 @@
-/*
- * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
 package eu.giuseppeurso.aws.s3;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.text.DecimalFormat;
 import java.util.UUID;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.Upload;
 
 /**
  * This sample demonstrates how to make basic requests to Amazon S3 using
@@ -57,7 +29,6 @@ public class TransportAgent {
 	private static AmazonS3 s3Client;
 	private static TransferManager tx;
 	
-
 	/**
 	 * A quick way for accessing the Amazon S3 web service using the PBECredentialsProvider in the constructor.
 	 * @param pbecProvider
@@ -66,10 +37,7 @@ public class TransportAgent {
 		s3Client = new AmazonS3Client(pbecProvider.getCredentials());
 		tx = new TransferManager(s3Client);
 	}
-	
-	
-	
-	
+		
 	/**
 	 * A simple method to put a new object to a S3 bucket. To prevent name collisions, a random UUID is used.
 	 * @param region
@@ -104,12 +72,20 @@ public class TransportAgent {
 		try {
 			System.out.println("Uploading directory recursively to S3...");
 			MultipleFileUpload mfu = tx.uploadDirectory(bucketName, directory.getName(), directory, true);
-			mfu.waitForCompletion();
+			//mfu.waitForCompletion();
+			while (mfu.isDone() == false) {
+				System.out.println("Progress: "+ (long) mfu.getProgress().getPercentTransferred()+" %");
+				Thread.currentThread().sleep(3000);
+			}
+			System.out.println("Progress: "+ (long) mfu.getProgress().getPercentTransferred()+" %");
+			long total = mfu.getProgress().getBytesTransferred();
+			String roundOff = new DecimalFormat("#.##").format((double)total/1000000);
+			System.out.println("Total transferred: "+total +" bytes (~ "+roundOff+ " MB)");
 			} catch (Exception e) {
 			System.out.println("Error while uploading directories recursively to S3.");
 			System.out.println(e);			
 		}		
-		System.out.println("Directory upload completed!");
+		System.out.println("Directory upload completed!");		
 	}
 	
 	
