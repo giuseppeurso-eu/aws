@@ -6,7 +6,10 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -19,6 +22,7 @@ import org.junit.Test;
 
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.logs.model.DataAlreadyAcceptedException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 
@@ -31,6 +35,7 @@ public class TransportAgentTest {
 	private static String clearCredentials = "";
 	private static String encryptedCredentials = "";
 	private static String password = "";
+	private static SimpleDateFormat sdf;
 	private static String uploadTestFile = "";
 	private static String uploadTestFile2 = "";
 	
@@ -52,6 +57,7 @@ public class TransportAgentTest {
 
 		// Resources setup
 		//
+		sdf = new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss");
 		resourceDir = "src/test/resources";
 		targetDir = "target";
 		clearCredentials = resourceDir + "/example-credentials.properties";
@@ -94,12 +100,14 @@ public class TransportAgentTest {
 	@Test
 	public void testUploadDirRecursively(){
 		boolean actual = false;
-		Region region = Region.getRegion(Regions.EU_WEST_1);
+//		Region region = Region.getRegion(Regions.EU_WEST_1);
+		String region= "EU_WEST_1";
 		String bucketName="gubucket-01";
 		File directory = new File(uploadTestFile2);
-		
+		String now = sdf.format(new java.util.Date());
+	    
 		try {
-			tagent.uploadDirRecursively(region, bucketName, directory);
+			tagent.uploadDirRecursively(region, bucketName, directory, now);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

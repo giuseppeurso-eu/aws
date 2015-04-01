@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -23,6 +24,8 @@ import com.amazonaws.services.s3.transfer.TransferManager;
  * <p>
  * 
  * @author Giuseppe Urso - <a href="http://www.giuseppeurso.eu">www.giuseppeurso.eu</a>
+ * @see <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingEncryption.html">S3 Data protection</a>
+ * @see <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/UploadingObjects.html">S3 Uploading Objects</a>
  */
 public class TransportAgent {
 
@@ -44,8 +47,9 @@ public class TransportAgent {
 	 * @param bucketName
 	 * @param file
 	 */
-	public void uploadNewFileWithRandomKey(Region region, String bucketName, File file) {
-		s3Client.setRegion(region);
+	public void uploadNewFileWithRandomKey(String region, String bucketName, File file) {
+		Region r = Region.getRegion(Regions.valueOf(region));
+		s3Client.setRegion(r);
 		String key = "ID_" + UUID.randomUUID();
 		System.out.println("Uploading a new object to S3 from a file...");
 		try {
@@ -62,31 +66,62 @@ public class TransportAgent {
 	}
 
 	/**
-	 * A method to upload a directory recursively to a S3 bucket. The provided directory name is used as root element.
-	 * @param region
+	 * A method to upload a directory recursively to a S3 bucket. The provided prefix name is used as root element.
+	 * 
+	 * @param region - Valid Amazon Regions are:</br>AP_NORTHEAST_1 </br>AP_SOUTHEAST_1</br> AP_SOUTHEAST_2</br>
+	 *  CN_NORTH_1</br> EU_CENTRAL_1</br>EU_WEST_1</br>GovCloud</br>SA_EAST_1</br>US_EAST_1</br>US_WEST_1</br>US_WEST_2 
 	 * @param bucketName
-	 * @param directory
+	 * @param directory - the source dir
+	 * @param prefix - the root destination dir
 	 */
-	public void uploadDirRecursively(Region region, String bucketName, File directory){
-		s3Client.setRegion(region);
+	public void uploadDirRecursively(String region, String bucketName, File directory, String prefix){
+		Region r = Region.getRegion(Regions.valueOf(region));
+		s3Client.setRegion(r);
 		try {
 			System.out.println("Uploading directory recursively to S3...");
-			MultipleFileUpload mfu = tx.uploadDirectory(bucketName, directory.getName(), directory, true);
+			MultipleFileUpload mfu = tx.uploadDirectory(bucketName, prefix+"/"+directory.getName(), directory, true);
 			//mfu.waitForCompletion();
-			while (mfu.isDone() == false) {
-				System.out.println("Progress: "+ (long) mfu.getProgress().getPercentTransferred()+" %");
-				Thread.currentThread().sleep(3000);
-			}
-			System.out.println("Progress: "+ (long) mfu.getProgress().getPercentTransferred()+" %");
-			long total = mfu.getProgress().getBytesTransferred();
-			String roundOff = new DecimalFormat("#.##").format((double)total/1000000);
-			System.out.println("Total transferred: "+total +" bytes (~ "+roundOff+ " MB)");
+			uploadProgressBar(mfu);
 			} catch (Exception e) {
 			System.out.println("Error while uploading directories recursively to S3.");
 			System.out.println(e);			
 		}		
 		System.out.println("Directory upload completed!");		
 	}
+	
+	/**
+	 * A progress bar for the upload to the standard output.
+	 * The escape sequence \b doesn't work in Eclipse because of an old bug not fixed yet.
+	 * @param multipleFileUpload
+	 * @see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=76936"> Eclipse Bug 76936 </a>
+	 */
+	private void uploadProgressBar(MultipleFileUpload multipleFileUpload){
+		
+		System.out.print("Progress:[=");
+		try {
+		while (multipleFileUpload.isDone() == false) {
+			//System.out.print("\r Progress: "+ (long) mfu.getProgress().getPercentTransferred()+" %");
+			long perc = (long) multipleFileUpload.getProgress().getPercentTransferred();
+			//System.out.print("\b");
+			System.out.print("= ");
+			System.out.print(perc+"%");
+			if (perc<10) {
+				System.out.print("\b\b\b");	
+			}else {
+				System.out.print("\b\b\b\b");
+			}
+				Thread.currentThread().sleep(2000);
+			}
+		}catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		System.out.print("\b] Done "+(long) multipleFileUpload.getProgress().getPercentTransferred()+" %\n");
+		long total = multipleFileUpload.getProgress().getBytesTransferred();
+		String roundOff = new DecimalFormat("#.##").format((double)total/1000000);
+		System.out.println("Total transferred: "+total +" bytes (~ "+roundOff+ " MB)");	
+		}
+		
 	
 	
     

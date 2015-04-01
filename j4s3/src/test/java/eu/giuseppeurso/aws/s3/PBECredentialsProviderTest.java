@@ -144,12 +144,29 @@ public class PBECredentialsProviderTest {
 		AWSCredentials awsc = pbecProvider.getCredentials();
 		String id = awsc.getAWSAccessKeyId();
 		String key = awsc.getAWSSecretKey();
-		System.out.println("key: "+key);
 		//Remove the attached char \n at the end of string
 		//key= key.substring(0,key.length()-1);
 		if (id!=null && id.equals(sourceID) && (key!=null && key.equals(sourceKey)) ) {
     		actual = true;
 		}
 		Assert.assertEquals("Invalid AWSCredentials. ID: "+id+" KEY: "+key, true, actual);
+	}
+	
+	@org.junit.Test
+	public void testSetCipherFromFileName() throws IOException{
+		boolean actual = false;
+		PBECredentialsProvider	pbecp = new PBECredentialsProvider();
+		pbecp.setCipherFromFileName(encryptedCredentials);
+		pbecp.setPassword(password);
+		AWSCredentials awsc = pbecp.getCredentials();
+		String id = awsc.getAWSAccessKeyId();
+		String key = awsc.getAWSSecretKey();
+		//Remove the attached char \n at the end of string
+		//key= key.substring(0,key.length()-1);
+		if (id!=null && id.equals(sourceID) && (key!=null && key.equals(sourceKey)) ) {
+    		actual = true;
+		}
+		Assert.assertEquals("Invalid AWSCredentials. ID: "+id+" KEY: "+key, true, actual);
+		
 	}
 }
