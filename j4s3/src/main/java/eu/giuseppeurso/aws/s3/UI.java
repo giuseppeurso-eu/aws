@@ -20,7 +20,11 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 
 public class UI {
 
@@ -85,8 +89,6 @@ public class UI {
 		}else if (option.equals("2")) {
 			System.out.println("");
 			System.out.println("\033[1mMODE 2\033[0m");
-			System.out.print("Inserire il file di testo da cui generare la licenza: ");
-			inputValue[0]= input.readLine();
 			sendToS3();
 		}else if (option.equals("3")) {
 			System.out.println("");
@@ -164,8 +166,47 @@ public class UI {
 
 
 
-	private static void sendToS3() {
-		// TODO Auto-generated method stub
+	private static void sendToS3() throws IOException {
+		System.out.println("Make sure you've a password-based encripted file with your AWS credentials (MODE 1 to make it).");
+		System.out.println("");
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		Map<String,String> inputMap = new LinkedHashMap<String, String>();
+		
+		System.out.println("Your credentials file path (ex. ./my-aws.file): ");
+		inputMap.put("credentials", in.readLine());
+		
+		System.out.println("Password: ");
+		inputMap.put("password", in.readLine());
+		
+		System.out.println("AWS Region: ");
+		inputMap.put("region", in.readLine());
+		
+		System.out.println("AWS Bucket Name: ");
+		inputMap.put("bucket", in.readLine());
+		
+		System.out.println("Directroy to send: ");
+		inputMap.put("sourceDir", in.readLine());
+		
+		System.out.println("Prefix you want to create in the S3 bucket (ex. 2015.03.22): ");
+		inputMap.put("prefix", in.readLine());
+		in.close();
+		
+		//Providing the AWS credentials
+		PBECredentialsProvider pbecProvider = new PBECredentialsProvider();
+		pbecProvider.setCipherFromFileName(inputMap.get("credentials"));
+		pbecProvider.setPassword(inputMap.get("password"));
+		
+		
+		// Uploading to S3
+		String region = inputMap.get("region");
+		String bucketName=inputMap.get("bucket");
+		File file = new File(inputMap.get("sourceDir"));
+		String prefix=inputMap.get("prefix");
+				
+		TransportAgent tagent = new TransportAgent(pbecProvider);
+		tagent.uploadDirRecursively(region, bucketName, file, prefix);
+		System.out.println("");
+		System.out.flush();
 		
 	}
 
@@ -212,13 +253,16 @@ public class UI {
 		System.out.println("");
 		System.out.println("\033[1mHELP\033[0m");
 		System.out.println("J4S3 is a java tool which provides a simple way to store and retrieve data from any Amazon S3 bucket.");
-		System.out.println("In order to securely sign requests to AWS services, both AWS access key ID and secret access key must be provided.");
-		System.out.println("Use MODE 1 to store your credentials into a file with password-based encryption.");
+		System.out.println("The J4S3 Client uses IAM user security credentials to send authenticated requests to Amazon S3.");
+		System.out.println("For more information about setting up a IAM user in you AWS Account see: ");
+		System.out.println("http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_SettingUpUser.html#Using_CreateUser_console");
+		System.out.println("");
+		System.out.println("After creating a IAM user for a bucket, run MODE 1 to store your AWS access ID and secret key into a file with password-based encryption.");
 		System.out.println("");
 		System.out.println("");
 		System.out.println("\033[MODE 1.\033[0m");
 		System.out.println("java -jar j4s3.jar");
-		System.out.println("It stores AWS access key ID and secret access key to a file with password-based encryption");
+		System.out.println("To store AWS access ID and secret key to a file with password-based encryption");
 		System.out.println("");
 		System.out.println("\033[1mMODE 2.\033[0m");
 		System.out.println("java -jar j4s3.jar  --put [your-bucket-id]");
