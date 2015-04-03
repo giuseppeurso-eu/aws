@@ -6,7 +6,7 @@ A simple Java application illustrating usage of the AWS SDK for Java. Once you'v
 JDK 1.7+  
 Maven 3  
 
-The project includes also a dependency of eu.giuseppeurso.security.jca. In order to succesfully build J4S3, first check out and build the eu.giuseppeurso.security.jca artifact first (https://github.com/giuseppeurso-eu/java-security/tree/master/jca). 
+The project includes also a dependency from eu.giuseppeurso.security.jca. In order to succesfully build J4S3, first check out and build the eu.giuseppeurso.security.jca artifact first (https://github.com/giuseppeurso-eu/java-security/tree/master/jca). 
 
 
 ## Build project
