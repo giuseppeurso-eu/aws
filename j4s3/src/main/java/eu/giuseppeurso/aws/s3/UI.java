@@ -203,8 +203,8 @@ public class UI {
 		File file = new File(inputMap.get("sourceDir"));
 		String prefix=inputMap.get("prefix");
 				
-		TransportAgent tagent = new TransportAgent(pbecProvider);
-		tagent.uploadDirRecursively(region, bucketName, file, prefix);
+		TransportAgent tagent = new TransportAgent(pbecProvider, region, bucketName);
+		tagent.uploadDirRecursively(file, prefix);
 		System.out.println("");
 		System.out.flush();
 		

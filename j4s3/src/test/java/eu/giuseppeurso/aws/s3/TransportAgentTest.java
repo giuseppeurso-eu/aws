@@ -62,7 +62,7 @@ public class TransportAgentTest {
 		targetDir = "target";
 		clearCredentials = resourceDir + "/example-credentials.properties";
 		encryptedCredentials = resourceDir + "/guaws.encrypted";
-		password = "123456789Aa";
+		password = "12345";
 		uploadTestFile=resourceDir+"/test1.txt";
 		uploadTestFile2=resourceDir+"/dir-test1";
 		
@@ -73,13 +73,15 @@ public class TransportAgentTest {
 		// A instance of PBECredentialsProvider is created
 		//
 		pbecProvider = new PBECredentialsProvider();
-		byte[] cipherText = FileUtils.readFileToByteArray(encryptedFile);
+//		byte[] cipherText = FileUtils.readFileToByteArray(encryptedFile);
 		pbecProvider.setPassword(password);
-		pbecProvider.setCipher(cipherText);
+		pbecProvider.setCipherFromFileName(encryptedCredentials);
 		
 		// Finally the TransportAgent to transfer objects to S3
 		//
-		tagent = new TransportAgent(pbecProvider);	
+		String region= "EU_WEST_1";
+		String bucketName="gubucket-01";
+		tagent = new TransportAgent(pbecProvider, region, bucketName);	
 	}
 	
 	
@@ -91,29 +93,35 @@ public class TransportAgentTest {
 //	    System.out.println("ID: "+pbecProvider.getCredentials().getAWSAccessKeyId());
 //	    System.out.println("KEy: "+pbecProvider.getCredentials().getAWSSecretKey());
 		
-		Region region = Region.getRegion(Regions.EU_WEST_1);
-		String bucketName="gubucket-01";
 		File file = new File(uploadTestFile);
-//		tagent.uploadNewFileWithRandomKey(region, bucketName, file);
+		tagent.uploadNewFileWithRandomKey(file);
 	}
 
 	@Test
 	public void testUploadDirRecursively(){
 		boolean actual = false;
-//		Region region = Region.getRegion(Regions.EU_WEST_1);
-		String region= "EU_WEST_1";
-		String bucketName="gubucket-01";
+		
 		File directory = new File(uploadTestFile2);
 		String now = sdf.format(new java.util.Date());
 	    
 		try {
-			tagent.uploadDirRecursively(region, bucketName, directory, now);
+			tagent.uploadDirRecursively(directory, now);
+			actual=true;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		actual=true;
+		
 		Assert.assertEquals("Error on TEST CASE: "+this.getClass(), true, actual);		
+	}
+	
+	@Test
+	public void testIsValidAWSAccess(){
+		boolean actual = false;
+		if(tagent.isAccessibleBucket()){
+			actual=true;
+		}
+		Assert.assertEquals("Error on TEST CASE: "+this.getClass(), true, actual);
 	}
 	
 }

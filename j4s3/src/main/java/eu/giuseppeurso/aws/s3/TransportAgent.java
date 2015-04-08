@@ -10,6 +10,9 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.ListObjectsRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -29,27 +32,62 @@ import com.amazonaws.services.s3.transfer.TransferManager;
  */
 public class TransportAgent {
 
-	private static AmazonS3 s3Client;
-	private static TransferManager tx;
+	private AmazonS3 s3Client;
+	private String bucketName;
 	
 	/**
 	 * A quick way for accessing the Amazon S3 web service using the PBECredentialsProvider in the constructor.
+	 * 
 	 * @param pbecProvider
+	 * @param region - Valid Amazon Regions are:</br>AP_NORTHEAST_1 </br>AP_SOUTHEAST_1</br> AP_SOUTHEAST_2</br>
+	 *  CN_NORTH_1</br> EU_CENTRAL_1</br>EU_WEST_1</br>GovCloud</br>SA_EAST_1</br>US_EAST_1</br>US_WEST_1</br>US_WEST_2 
+	 * @param bucket the target S3 bucket name 
 	 */
-	public TransportAgent(PBECredentialsProvider pbecProvider) {
-		s3Client = new AmazonS3Client(pbecProvider.getCredentials());
-		tx = new TransferManager(s3Client);
+	public TransportAgent (PBECredentialsProvider pbecProvider, String region, String bucket) {
+		this.setS3Client(new AmazonS3Client(pbecProvider.getCredentials()));
+		Region r = Region.getRegion(Regions.valueOf(region));
+		s3Client.setRegion(r);	
+		this.setBucketName(bucket);
+		if (!isAccessibleBucket()) {
+			throw new AmazonS3Exception("The provided AWS bucket is not accessible, please check it!"+" - Region ID is: "+region+ " - Bucket name is: "+bucketName);
+		}		
 	}
-		
+
+	/**
+	 * @return the s3Client
+	 */
+	private AmazonS3 getS3Client() {
+		return s3Client;
+	}
+
+	/**
+	 * @param s3Client the s3Client to set
+	 */
+	private void setS3Client(AmazonS3 s3Client) {
+		this.s3Client = s3Client;
+	}
+
+	/**
+	 * @return the bucketName
+	 */
+	private String getBucketName() {
+		return bucketName;
+	}
+
+
+	/**
+	 * @param bucketName the bucketName to set
+	 */
+	private void setBucketName(String bucketName) {
+		this.bucketName = bucketName;
+	}
+
 	/**
 	 * A simple method to put a new object to a S3 bucket. To prevent name collisions, a random UUID is used.
-	 * @param region
-	 * @param bucketName
 	 * @param file
 	 */
-	public void uploadNewFileWithRandomKey(String region, String bucketName, File file) {
-		Region r = Region.getRegion(Regions.valueOf(region));
-		s3Client.setRegion(r);
+	public void uploadNewFileWithRandomKey(File file) {
+		
 		String key = "ID_" + UUID.randomUUID();
 		System.out.println("Uploading a new object to S3 from a file...");
 		try {
@@ -58,9 +96,9 @@ public class TransportAgent {
 			System.out.println("Service error while uploading a new object to S3.");
 			System.out.println(e);
 			e.printStackTrace();
-		} catch (AmazonClientException e) {
+		} catch (AmazonClientException c) {
 			System.out.println("Client error while uploading a new object to S3.");
-			System.out.println(e);
+			System.out.println(c);
 		}
 		System.out.println("Creation of the new object completed!");
 	}
@@ -68,24 +106,23 @@ public class TransportAgent {
 	/**
 	 * A method to upload a directory recursively to a S3 bucket. The provided prefix name is used as root element.
 	 * 
-	 * @param region - Valid Amazon Regions are:</br>AP_NORTHEAST_1 </br>AP_SOUTHEAST_1</br> AP_SOUTHEAST_2</br>
-	 *  CN_NORTH_1</br> EU_CENTRAL_1</br>EU_WEST_1</br>GovCloud</br>SA_EAST_1</br>US_EAST_1</br>US_WEST_1</br>US_WEST_2 
-	 * @param bucketName
 	 * @param directory - the source dir
 	 * @param prefix - the root destination dir
 	 */
-	public void uploadDirRecursively(String region, String bucketName, File directory, String prefix){
-		Region r = Region.getRegion(Regions.valueOf(region));
-		s3Client.setRegion(r);
-		try {
+	public void uploadDirRecursively (File directory, String prefix){
+		try{
 			System.out.println("Uploading directory recursively to S3...");
+			TransferManager tx = new TransferManager(s3Client);
 			MultipleFileUpload mfu = tx.uploadDirectory(bucketName, prefix+"/"+directory.getName(), directory, true);
 			//mfu.waitForCompletion();
 			uploadProgressBar(mfu);
-			} catch (Exception e) {
-			System.out.println("Error while uploading directories recursively to S3.");
+			} catch (AmazonServiceException e) {
+			System.out.println("AWS Service error while uploading directories recursively to S3.");
 			System.out.println(e);			
-		}		
+		}catch (AmazonClientException c) {
+			System.out.println("AWS Client error while uploading directories recursively to S3.");
+			System.out.println(c);			
+		}				
 		System.out.println("Directory upload completed!");		
 	}
 	
@@ -123,7 +160,36 @@ public class TransportAgent {
 		}
 		
 	
-	
+		/**
+		 * The AWS Credentials checker. This method try to list objects included in a S3 bucket using the AWSCredentials provider passed in the constructor.
+		 * You can create the AmazonS3Client class without providing your security credentials. Requests sent using this client are anonymous requests,
+		 * without a signature. Amazon S3 returns an error if you send anonymous requests for a resource that is not publicly available.
+		 * 
+		 * @see <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/AuthUsingAcctOrUserCredJava.html"> Making requests using AWS credentials</a>
+		 * @param region
+		 * @param bucketName
+		 */
+		public boolean isAccessibleBucket(){
+			boolean valid = false;
+			try {
+				ListObjectsRequest listObjectsRequest = new ListObjectsRequest().withBucketName(bucketName);
+				ObjectListing objectListing;            
+	            do {
+	                objectListing = s3Client.listObjects(listObjectsRequest);
+	                listObjectsRequest.setMarker(objectListing.getNextMarker());
+	            } while (objectListing.isTruncated());
+	            valid=true;
+			} catch (AmazonServiceException ase) {
+	            System.out.println("AmazonServiceException,"+"your request to Amazon S3 was rejected with an error response.");
+	            System.out.println("Error Message:    " + ase.getMessage());
+	            System.out.println("Error Type:       " + ase.getErrorType());
+	        } catch (AmazonClientException ace) {
+	            System.out.println("AmazonClientException,"+ "the client encountered an internal error while trying to communicate with S3, such as not being able to access the network.");
+	            System.out.println("Error Message: " + ace.getMessage());
+	        }
+			return valid;
+			
+		}
     
 //	public static void main(String[] args) throws IOException {
 //        /*
@@ -241,7 +307,7 @@ public class TransportAgent {
 //                    + "to Amazon S3, but was rejected with an error response for some reason.");
 //            System.out.println("Error Message:    " + ase.getMessage());
 //            System.out.println("HTTP Status Code: " + ase.getStatusCode());
-//            System.out.println("AWS Error Code:   " + ase.getErrorCode());
+//            System.out.println("AWS Error Code:   " + ase.getErrorCode());http://docs.aws.amazon.com/AmazonS3/latest/dev/AuthUsingAcctOrUserCredJava.html
 //            System.out.println("Error Type:       " + ase.getErrorType());
 //            System.out.println("Request ID:       " + ase.getRequestId());
 //        } catch (AmazonClientException ace) {
@@ -254,6 +320,7 @@ public class TransportAgent {
     
    
 
+	
 	
 
 
