@@ -1,4 +1,4 @@
-package eu.giuseppeurso.aws.s3;
+package eu.giuseppeurso.aws.s3.jclient.ui;
 
 import java.io.File;
 import java.io.IOException;

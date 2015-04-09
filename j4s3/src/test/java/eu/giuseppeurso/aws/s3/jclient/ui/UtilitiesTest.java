@@ -1,4 +1,4 @@
-package eu.giuseppeurso.aws.s3;
+package eu.giuseppeurso.aws.s3.jclient.ui;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import eu.giuseppeurso.aws.s3.jclient.transport.PBECredentialsProvider;
+import eu.giuseppeurso.aws.s3.jclient.ui.Utilities;
 import eu.giuseppeurso.security.jca.crypto.PasswordBasedEncryption;
 
 /**

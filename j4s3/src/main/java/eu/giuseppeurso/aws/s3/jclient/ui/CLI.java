@@ -12,10 +12,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import eu.giuseppeurso.aws.s3.Utilities;
+
 import eu.giuseppeurso.aws.s3.jclient.transport.PBECredentialsProvider;
 import eu.giuseppeurso.aws.s3.jclient.transport.TransportAgent;
 
