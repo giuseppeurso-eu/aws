@@ -3,36 +3,36 @@ package eu.giuseppeurso.aws.s3.jclient.ui;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
-import java.text.Normalizer.Form;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
-import org.apache.commons.io.FileUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-
 import eu.giuseppeurso.aws.s3.Utilities;
 import eu.giuseppeurso.aws.s3.jclient.transport.PBECredentialsProvider;
 import eu.giuseppeurso.aws.s3.jclient.transport.TransportAgent;
 
-public class UI {
-
+/**
+ * This class represents a simply interactive command-line interface.
+ * If the virtual machine is started from a command-line interpreter, without redirecting the standard input and output streams then
+ * its console will exist and will typically be connected to the keyboard and display from which the virtual machine was launched.
+ * @author Giuseppe Urso - <a href="http://www.giuseppeurso.eu">www.giuseppeurso.eu</a>
+ *
+ */
+public class CLI {
 	
+	/**
+	 * The standard main method to get the input arguments.
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 		printBanner();
 		selectOption();
@@ -107,8 +107,6 @@ public class UI {
 		}
 	}
 	
-	
-
 	/**
 	 * This method launches the wizard for the AWS credentials encryption. A file with the encrypted credentials is generated. 
 	 * @throws IOException

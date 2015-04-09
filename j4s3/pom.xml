@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.giuseppeurso.aws</groupId>
-	<artifactId>s3</artifactId>
+	<artifactId>s3-j4s3</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>AWS S3 utilities</name>
+	<name>Java Client for S3</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -82,7 +82,7 @@
 					<manifest>
 						<addClasspath>true</addClasspath>
                         <classpathPrefix>lib/</classpathPrefix>
-						<mainClass>eu.giuseppeurso.aws.s3.UI</mainClass>
+						<mainClass>eu.giuseppeurso.aws.s3.jclient.ui.CLI</mainClass>
 					</manifest>
 				  </archive>
 				</configuration>
