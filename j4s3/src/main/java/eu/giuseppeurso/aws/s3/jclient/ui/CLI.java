@@ -168,7 +168,10 @@ public class CLI {
 	}
 
 
-
+    /**
+     * A method to send objects to the S3 bucket.
+     * @throws IOException
+     */
 	private static void sendToS3() throws IOException {
 		System.out.println("Make sure you've a password-based encripted file with your AWS credentials (MODE 1 to make it).");
 		System.out.println("");
