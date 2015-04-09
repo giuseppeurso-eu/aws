@@ -1,4 +1,4 @@
-package eu.giuseppeurso.aws.s3;
+package eu.giuseppeurso.aws.s3.jclient.transport;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +26,8 @@ import com.amazonaws.services.logs.model.DataAlreadyAcceptedException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 
+import eu.giuseppeurso.aws.s3.jclient.transport.PBECredentialsProvider;
+import eu.giuseppeurso.aws.s3.jclient.transport.TransportAgent;
 import eu.giuseppeurso.security.jca.crypto.PasswordBasedEncryption;
 
 public class TransportAgentTest {

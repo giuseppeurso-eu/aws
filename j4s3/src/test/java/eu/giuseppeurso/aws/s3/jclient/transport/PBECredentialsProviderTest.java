@@ -1,4 +1,4 @@
-package eu.giuseppeurso.aws.s3;
+package eu.giuseppeurso.aws.s3.jclient.transport;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 
 import com.amazonaws.auth.AWSCredentials;
 
+import eu.giuseppeurso.aws.s3.jclient.transport.PBECredentialsProvider;
 import eu.giuseppeurso.security.jca.crypto.PasswordBasedEncryption;
 
 
@@ -40,7 +41,7 @@ public class PBECredentialsProviderTest {
 	private static String sourceID= "";
 	private static String sourceKey = "";
 	
-	static PBECredentialsProvider pbecProvider;
+	private static PBECredentialsProvider pbecProvider;
 	
 	/**
 	 * The setup method to prepare all test cases. @BeforeClass annotation causes it to be run once before any of the test methods in the class.

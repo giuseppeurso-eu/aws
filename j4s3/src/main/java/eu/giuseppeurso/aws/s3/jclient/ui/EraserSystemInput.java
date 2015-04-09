@@ -1,4 +1,4 @@
-package eu.giuseppeurso.aws.s3;
+package eu.giuseppeurso.aws.s3.jclient.ui;
 
 public class EraserSystemInput extends Thread  {
 

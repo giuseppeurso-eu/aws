@@ -17,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Assert;
 import org.junit.Test;
 
+import eu.giuseppeurso.aws.s3.jclient.transport.PBECredentialsProvider;
 import eu.giuseppeurso.security.jca.crypto.PasswordBasedEncryption;
 
 /**

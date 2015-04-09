@@ -1,4 +1,4 @@
-package eu.giuseppeurso.aws.s3;
+package eu.giuseppeurso.aws.s3.jclient.ui;
 
 import java.io.BufferedReader;
 import java.io.Console;
@@ -25,6 +25,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+
+import eu.giuseppeurso.aws.s3.Utilities;
+import eu.giuseppeurso.aws.s3.jclient.transport.PBECredentialsProvider;
+import eu.giuseppeurso.aws.s3.jclient.transport.TransportAgent;
 
 public class UI {
 

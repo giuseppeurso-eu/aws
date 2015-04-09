@@ -1,4 +1,4 @@
-package eu.giuseppeurso.aws.s3;
+package eu.giuseppeurso.aws.s3.jclient.transport;
 
 import java.io.File;
 import java.text.DecimalFormat;
