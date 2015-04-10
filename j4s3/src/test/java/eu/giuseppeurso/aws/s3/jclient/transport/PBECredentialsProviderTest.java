@@ -16,6 +16,7 @@ import javax.crypto.NoSuchPaddingException;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 import com.amazonaws.auth.AWSCredentials;
 
@@ -95,7 +96,7 @@ public class PBECredentialsProviderTest {
 	* 
 	* @throws Exception
 	*/
-	@org.junit.Test
+	@Test
 	public void testDecryptCredentials() throws Exception {
 
 		boolean actual = false;
@@ -118,7 +119,7 @@ public class PBECredentialsProviderTest {
 	 * Test case for retrieveAWSKey
 	 * @throws Exception
 	 */
-	@org.junit.Test
+	@Test
 	public void testRetrieveAWSKey() throws Exception {
 		boolean actual = false;
 		
@@ -138,7 +139,7 @@ public class PBECredentialsProviderTest {
 	 * Test case for getCredentials
 	 * @throws Exception
 	 */
-	@org.junit.Test
+	@Test
 	public void testGetCredentials() throws Exception {
 		
 		boolean actual = false;
@@ -153,7 +154,7 @@ public class PBECredentialsProviderTest {
 		Assert.assertEquals("Invalid AWSCredentials. ID: "+id+" KEY: "+key, true, actual);
 	}
 	
-	@org.junit.Test
+	@Test
 	public void testSetCipherFromFileName() throws IOException{
 		boolean actual = false;
 		PBECredentialsProvider	pbecp = new PBECredentialsProvider();

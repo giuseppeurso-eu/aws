@@ -24,6 +24,7 @@ import eu.giuseppeurso.aws.s3.jclient.transport.TransportAgent;
  * This class represents a simply interactive command-line interface.
  * If the virtual machine is started from a command-line interpreter, without redirecting the standard input and output streams then
  * its console will exist and will typically be connected to the keyboard and display from which the virtual machine was launched.
+ * 
  * @author Giuseppe Urso - <a href="http://www.giuseppeurso.eu">www.giuseppeurso.eu</a>
  *
  */
@@ -75,7 +76,7 @@ public class CLI {
 		System.out.println("");
 
 		BufferedReader input = null;
-		System.out.print("Seleziona un'opzione [1]: ");
+		System.out.print("Please select an option [1]: ");
 		String option = "";
 		input = new BufferedReader(new InputStreamReader(System.in));
 
@@ -184,7 +185,7 @@ public class CLI {
 		System.out.println("Password: ");
 		inputMap.put("password", in.readLine());
 		
-		System.out.println("AWS Region: ");
+		System.out.println("AWS Region (ex. EU_WEST_1 ): ");
 		inputMap.put("region", in.readLine());
 		
 		System.out.println("AWS Bucket Name: ");
@@ -258,7 +259,8 @@ public class CLI {
 	public static void printUsage() {
 		System.out.println("");
 		System.out.println("\033[1mHELP\033[0m");
-		System.out.println("J4S3 is a java tool which provides a simple way to store and retrieve data from any Amazon S3 bucket.");
+		System.out.println("------------------------------------------");
+		System.out.println("J4S3 is a java tool which provides a simple way to store or retrieve data from any Amazon S3 bucket.");
 		System.out.println("The J4S3 Client uses IAM user security credentials to send authenticated requests to Amazon S3.");
 		System.out.println("For more information about setting up a IAM user in you AWS Account see: ");
 		System.out.println("http://docs.aws.amazon.com/IAM/latest/UserGuide/Using_SettingUpUser.html#Using_CreateUser_console");
@@ -266,20 +268,22 @@ public class CLI {
 		System.out.println("After creating a IAM user for a bucket, run MODE 1 to store your AWS access ID and secret key into a file with password-based encryption.");
 		System.out.println("");
 		System.out.println("");
-		System.out.println("\033[MODE 1.\033[0m");
+		System.out.println("\033[1mMODE 1.\033[0m");
 		System.out.println("java -jar j4s3.jar");
-		System.out.println("To store AWS access ID and secret key to a file with password-based encryption");
+		System.out.println("Store AWS access ID and secret key to a file with password-based encryption");
 		System.out.println("");
 		System.out.println("\033[1mMODE 2.\033[0m");
-		System.out.println("java -jar j4s3.jar  --put [your-bucket-id]");
-		System.out.println("Send files to S3 bucket");
+		System.out.println("java -jar j4s3.jar");
+		System.out.println("Send files to S3 bucket.");
+		System.out.println("Requires:");
+		System.out.println(" - credentials file path (ex. ./my-aws.file);");
+		System.out.println(" - credentials password;");
+		System.out.println(" - S3 region (valid regions are: AP_NORTHEAST_1|AP_SOUTHEAST_1|AP_SOUTHEAST_2|CN_NORTH_1|EU_CENTRAL_1|EU_WEST_1|GovCloud|SA_EAST_1||US_EAST_1|US_WEST_1|US_WEST_2);");
+		System.out.println(" - S3 bucket name;");
+		System.out.println(" - path of the source directory to send;");
 		System.out.println("");
-		System.out.println("\033[1mMODE' 3.\033[0m");
-		System.out.println("java -jar j4s3.jar  --get [your-bucket-id]");
+		System.out.println("\033[1mMODE 3.\033[0m");
+		System.out.println("java -jar j4s3.jar");
 		System.out.println("Retrieve files from S3 bucket");
-	}
-	
-	
-	
-	
+	}	
 }

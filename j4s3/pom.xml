@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.giuseppeurso.aws</groupId>
 	<artifactId>s3-j4s3</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>Java Client for S3</name>
 
 	<properties>
@@ -35,21 +35,6 @@
 			</resource>
 		</resources>
 		<plugins>
-			<!-- <plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<mainClass>com.amazonaws.samples.S3Sample</mainClass>
-				</configuration>
-			</plugin>-->
 			
 			<!-- To prevent conflicts between the project's MANIFEST.MF and the bouncycastle jar,
 			     all dependencies are copied in a dedicated lib directory.    -->
@@ -87,8 +72,6 @@
 				  </archive>
 				</configuration>
 			</plugin>
-			
-			
 			
 		</plugins>
 	</build>
