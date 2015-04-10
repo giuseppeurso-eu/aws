@@ -6,29 +6,16 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-
-import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.logs.model.DataAlreadyAcceptedException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-
 import eu.giuseppeurso.aws.s3.jclient.transport.PBECredentialsProvider;
 import eu.giuseppeurso.aws.s3.jclient.transport.TransportAgent;
-import eu.giuseppeurso.security.jca.crypto.PasswordBasedEncryption;
+
 
 public class TransportAgentTest {
 
@@ -67,15 +54,10 @@ public class TransportAgentTest {
 		password = "12345";
 		uploadTestFile=resourceDir+"/test1.txt";
 		uploadTestFile2=resourceDir+"/dir-test1";
-		
-		// The encrypted file with AWS credentials
-		//
-		File encryptedFile = new File(encryptedCredentials);
-		
+				
 		// A instance of PBECredentialsProvider is created
 		//
 		pbecProvider = new PBECredentialsProvider();
-//		byte[] cipherText = FileUtils.readFileToByteArray(encryptedFile);
 		pbecProvider.setPassword(password);
 		pbecProvider.setCipherFromFileName(encryptedCredentials);
 		
@@ -120,7 +102,7 @@ public class TransportAgentTest {
 	@Test
 	public void testIsValidAWSAccess(){
 		boolean actual = false;
-		if(tagent.isAccessibleBucket()){
+		if(tagent.isBucketAccessible()){
 			actual=true;
 		}
 		Assert.assertEquals("Error on TEST CASE: "+this.getClass(), true, actual);

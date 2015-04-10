@@ -11,15 +11,16 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 
 /**
- * This sample demonstrates how to make basic requests to Amazon S3 using
- * the AWS SDK for Java <a href="http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html">AWS SDK Java API Reference</a>
+ * This class represents  sample demonstrates how to make basic requests to Amazon S3 using
+ * the AWS SDK for Java <a href="http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/index.html">AWS SDK Java API Reference</a><br>
+ * The low-level AWS APIs correspond to the Amazon S3 REST operations.
+ * Data are securely transferred  from/to Amazon S3 via SSL endpoints by using the HTTPS protocol. 
+ * 
  * <p>
  * <b>Prerequisites:</b> You must have a valid Amazon Web Services 
  * account, and be signed up to use Amazon S3. For more information on
@@ -27,6 +28,7 @@ import com.amazonaws.services.s3.transfer.TransferManager;
  * <p>
  * 
  * @author Giuseppe Urso - <a href="http://www.giuseppeurso.eu">www.giuseppeurso.eu</a>
+ * @see <a href="http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/s3/transfer/TransferManager.html">S3 TransferManager</a>
  * @see <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingEncryption.html">S3 Data protection</a>
  * @see <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/UploadingObjects.html">S3 Uploading Objects</a>
  */
@@ -37,7 +39,9 @@ public class TransportAgent {
 	
 	/**
 	 * A quick way for accessing the Amazon S3 web service using the PBECredentialsProvider in the constructor.
-	 * 
+	 * You can create the AmazonS3Client class without providing your security credential but requests sent using this client are anonymous requests
+	 * without a signature. Amazon S3 returns an error if you send anonymous requests for a resource that is not publicly available.
+	 *  
 	 * @param pbecProvider
 	 * @param region - Valid Amazon Regions are:</br>AP_NORTHEAST_1 </br>AP_SOUTHEAST_1</br> AP_SOUTHEAST_2</br>
 	 *  CN_NORTH_1</br> EU_CENTRAL_1</br>EU_WEST_1</br>GovCloud</br>SA_EAST_1</br>US_EAST_1</br>US_WEST_1</br>US_WEST_2 
@@ -48,8 +52,9 @@ public class TransportAgent {
 		Region r = Region.getRegion(Regions.valueOf(region));
 		s3Client.setRegion(r);	
 		this.setBucketName(bucket);
-		if (!isAccessibleBucket()) {
+		if (!isBucketAccessible()) {
 			throw new AmazonS3Exception("The provided AWS bucket is not accessible, please check it!"+" - Region ID is: "+region+ " - Bucket name is: "+bucketName);
+			
 		}		
 	}
 
@@ -110,9 +115,9 @@ public class TransportAgent {
 	 * @param prefix - the root destination dir
 	 */
 	public void uploadDirRecursively (File directory, String prefix){
+		TransferManager tx = new TransferManager(s3Client);
 		try{
 			System.out.println("Uploading directory recursively to S3...");
-			TransferManager tx = new TransferManager(s3Client);
 			MultipleFileUpload mfu = tx.uploadDirectory(bucketName, prefix+"/"+directory.getName(), directory, true);
 			//mfu.waitForCompletion();
 			uploadProgressBar(mfu);
@@ -122,7 +127,8 @@ public class TransportAgent {
 		}catch (AmazonClientException c) {
 			System.out.println("AWS Client error while uploading directories recursively to S3.");
 			System.out.println(c);			
-		}				
+		}
+		//tx.shutdownNow();
 		System.out.println("Directory upload completed!");		
 	}
 	
@@ -147,7 +153,8 @@ public class TransportAgent {
 			}else {
 				System.out.print("\b\b\b\b");
 			}
-				Thread.currentThread().sleep(2000);
+				Thread.currentThread();
+				Thread.sleep(2000);
 			}
 		}catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -161,28 +168,27 @@ public class TransportAgent {
 		
 	
 		/**
-		 * The AWS Credentials checker. This method try to list objects included in a S3 bucket using the AWSCredentials provider passed in the constructor.
-		 * You can create the AmazonS3Client class without providing your security credentials. Requests sent using this client are anonymous requests,
-		 * without a signature. Amazon S3 returns an error if you send anonymous requests for a resource that is not publicly available.
+		 * The AWS Credentials checker. This method initially tried to list objects included in a S3 bucket using the AWSCredentials provider. This
+		 * caused performance issues with the SSL handshake for buckets with a large number of objects.
+		 * Now the method try to get a single fake object in the bucket using a random key ID. This will throw an exception because you're trying to fetch a key that doesn't exist.
+		 * If AmazonServiceException shows an error code equals "NoSuchKey"  then you have read access to the bucket.
 		 * 
 		 * @see <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/AuthUsingAcctOrUserCredJava.html"> Making requests using AWS credentials</a>
 		 * @param region
 		 * @param bucketName
 		 */
-		public boolean isAccessibleBucket(){
+		public boolean isBucketAccessible(){
 			boolean valid = false;
 			try {
-				ListObjectsRequest listObjectsRequest = new ListObjectsRequest().withBucketName(bucketName);
-				ObjectListing objectListing;            
-	            do {
-	                objectListing = s3Client.listObjects(listObjectsRequest);
-	                listObjectsRequest.setMarker(objectListing.getNextMarker());
-	            } while (objectListing.isTruncated());
-	            valid=true;
+			 s3Client.getObject(bucketName, UUID.randomUUID().toString());
 			} catch (AmazonServiceException ase) {
-	            System.out.println("AmazonServiceException,"+"your request to Amazon S3 was rejected with an error response.");
-	            System.out.println("Error Message:    " + ase.getMessage());
-	            System.out.println("Error Type:       " + ase.getErrorType());
+	            if	(ase.getErrorCode().equals("NoSuchKey")){
+	            	valid = true;
+	            }else {
+	            	System.out.println("AmazonServiceException,"+"your request to Amazon S3 was rejected with an error response.");
+		            System.out.println("Error Message:    " + ase.getMessage());
+		            System.out.println("Error Type:       " + ase.getErrorType());
+				}
 	        } catch (AmazonClientException ace) {
 	            System.out.println("AmazonClientException,"+ "the client encountered an internal error while trying to communicate with S3, such as not being able to access the network.");
 	            System.out.println("Error Message: " + ace.getMessage());
@@ -190,148 +196,4 @@ public class TransportAgent {
 			return valid;
 			
 		}
-    
-//	public static void main(String[] args) throws IOException {
-//        /*
-//         * Create your credentials file at ~/.aws/credentials (C:\Users\USER_NAME\.aws\credentials for Windows users) 
-//         * and save the following lines after replacing the underlined values with your own.
-//         *
-//         * [default]
-//         * aws_access_key_id = YOUR_ACCESS_KEY_ID
-//         * aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
-//         */
-//
-////        AmazonS3 s3 = new AmazonS3Client();
-//    	//user gubkup
-////    	String access_key_id = "AKIAJXUTJVYGR3V2W6GA";
-////        String secret_access_key= "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";
-////        BasicAWSCredentials awsCreds = new BasicAWSCredentials(access_key_id, secret_access_key);
-//        PBECredentialsProvider pbecp = new PBECredentialsProvider();
-//        AmazonS3 s3 = new AmazonS3Client(pbecp.getCredentials());
-//        Region usWest2 = Region.getRegion(Regions.EU_WEST_1);
-//        s3.setRegion(usWest2);
-//        
-//        
-//
-////        String bucketName = "gubucket-01" + UUID.randomUUID();
-//        String bucketName = "gubucket-01";
-//        String key = "MyObjectKey"+UUID.randomUUID();
-//
-//        System.out.println("===========================================");
-//        System.out.println("Getting Started with Amazon S3");
-//        System.out.println("===========================================\n");
-//
-//        try {
-//            /*
-//             * Create a new S3 bucket - Amazon S3 bucket names are globally unique,
-//             * so once a bucket name has been taken by any user, you can't create
-//             * another bucket with that same name.
-//             *
-//             * You can optionally specify a location for your bucket if you want to
-//             * keep your data closer to your applications or users.
-//             */
-////            System.out.println("Creating bucket " + bucketName + "\n");
-////            s3.createBucket(bucketName);
-//
-//            /*
-//             * List the buckets in your account
-//             */
-////            System.out.println("Listing buckets");
-////            for (Bucket bucket : s3.listBuckets()) {
-////                System.out.println(" - " + bucket.getName());
-////            }
-////            System.out.println();
-//
-//            /*
-//             * Upload an object to your bucket - You can easily upload a file to
-//             * S3, or upload directly an InputStream if you know the length of
-//             * the data in the stream. You can also specify your own metadata
-//             * when uploading to S3, which allows you set a variety of options
-//             * like content-type and content-encoding, plus additional metadata
-//             * specific to your applications.
-//             */
-//            System.out.println("Uploading a new object to S3 from a file\n");
-//            s3.putObject(new PutObjectRequest(bucketName, key, createSampleFile()));
-//
-//            /*
-//             * Download an object - When you download an object, you get all of
-//             * the object's metadata and a stream from which to read the contents.
-//             * It's important to read the contents of the stream as quickly as
-//             * possibly since the data is streamed directly from Amazon S3 and your
-//             * network connection will remain open until you read all the data or
-//             * close the input stream.
-//             *
-//             * GetObjectRequest also supports several other options, including
-//             * conditional downloading of objects based on modification times,
-//             * ETags, and selectively downloading a range of an object.
-//             */
-//            System.out.println("Downloading an object");
-//            S3Object object = s3.getObject(new GetObjectRequest(bucketName, key));
-//            System.out.println("Content-Type: "  + object.getObjectMetadata().getContentType());
-//            displayTextInputStream(object.getObjectContent());
-//
-//            /*
-//             * List objects in your bucket by prefix - There are many options for
-//             * listing the objects in your bucket.  Keep in mind that buckets with
-//             * many objects might truncate their results when listing their objects,
-//             * so be sure to check if the returned object listing is truncated, and
-//             * use the AmazonS3.listNextBatchOfObjects(...) operation to retrieve
-//             * additional results.
-//             */
-//            System.out.println("Listing objects");
-//            ObjectListing objectListing = s3.listObjects(new ListObjectsRequest()
-//                    .withBucketName(bucketName)
-//                    .withPrefix("My"));
-//            for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-//                System.out.println(" - " + objectSummary.getKey() + "  " +
-//                        "(size = " + objectSummary.getSize() + ")");
-//            }
-//            System.out.println();
-//
-//            /*
-//             * Delete an object - Unless versioning has been turned on for your bucket,
-//             * there is no way to undelete an object, so use caution when deleting objects.
-//             */
-//            System.out.println("Deleting an object\n");
-//            s3.deleteObject(bucketName, key);
-//
-//            /*
-//             * Delete a bucket - A bucket must be completely empty before it can be
-//             * deleted, so remember to delete any objects from your buckets before
-//             * you try to delete them.
-//             */
-////            System.out.println("Deleting bucket " + bucketName + "\n");
-////            s3.deleteBucket(bucketName);
-//        } catch (AmazonServiceException ase) {
-//            System.out.println("Caught an AmazonServiceException, which means your request made it "
-//                    + "to Amazon S3, but was rejected with an error response for some reason.");
-//            System.out.println("Error Message:    " + ase.getMessage());
-//            System.out.println("HTTP Status Code: " + ase.getStatusCode());
-//            System.out.println("AWS Error Code:   " + ase.getErrorCode());http://docs.aws.amazon.com/AmazonS3/latest/dev/AuthUsingAcctOrUserCredJava.html
-//            System.out.println("Error Type:       " + ase.getErrorType());
-//            System.out.println("Request ID:       " + ase.getRequestId());
-//        } catch (AmazonClientException ace) {
-//            System.out.println("Caught an AmazonClientException, which means the client encountered "
-//                    + "a serious internal problem while trying to communicate with S3, "
-//                    + "such as not being able to access the network.");
-//            System.out.println("Error Message: " + ace.getMessage());
-//        }
-//    }
-    
-   
-
-	
-	
-
-
-
-
-	
-
-
-
-	    
-    
-    
-
 }
