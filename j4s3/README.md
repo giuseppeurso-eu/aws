@@ -33,7 +33,7 @@ and uploads a file to that bucket. When you start making your own buckets, the S
 ```
 
 ## How J4S3 works
-http://www.giuseppeurso.eu/java-client-per-amazon-s3-con-aws-sdk/
+http://www.giuseppeurso.eu/en/java-client-for-amazon-s3-with-aws-sdk/
 
 ## License
 
